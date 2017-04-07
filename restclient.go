@@ -163,7 +163,7 @@ func (r *RestClient) send() (body []byte, statusCode int, responseError string, 
 	statusCode = response.Status
 
 	// set responseError of failed response (status >= 400)
-	if response.Status >= http.StatusBadRequest {
+	if statusCode >= http.StatusBadRequest {
 		responseError = string(body)
 	}
 
