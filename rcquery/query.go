@@ -1,9 +1,9 @@
 package rcquery
 
 import (
-	"fmt"
 	"net/url"
 	"reflect"
+	"strconv"
 )
 
 type Query struct {
@@ -24,19 +24,24 @@ func (q *Query) Add(key string, value interface{}) *Query {
 
 	val := reflect.ValueOf(value)
 	switch val.Kind() {
-	case reflect.Bool,
-		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-		reflect.Float32, reflect.Float64:
-		q.query += separator + key + "=" + fmt.Sprint(value)
+	case reflect.Bool:
+		q.query += separator + key + "=" + strconv.FormatBool(val.Bool())
+
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		q.query += separator + key + "=" + strconv.FormatInt(val.Int(), 10)
+
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		q.query += separator + key + "=" + strconv.FormatUint(val.Uint(), 10)
+
+	case reflect.Float32, reflect.Float64:
+		q.query += separator + key + "=" + strconv.FormatFloat(val.Float(), 'f', -1, 64)
 
 	case reflect.String:
-		q.query += separator + key + "=" + url.QueryEscape(fmt.Sprint(value))
+		q.query += separator + key + "=" + url.QueryEscape(val.String())
 
 	case reflect.Array, reflect.Slice:
 		for i := 0; i < val.Len(); i++ {
-			colVal := val.Index(i).Interface()
-			q.Add(key, colVal)
+			q.Add(key, val.Index(i).Interface())
 		}
 	default:
 		// will ignored

@@ -19,8 +19,13 @@ func TestQuery(t *testing.T) {
 
 	query := rcquery.New().
 		Add("Blob", "Crop").
-		Add("Limit", 23).Get()
-	assert.Equal(query, "?Blob=Crop&Limit=23")
+		Add("Limit", uint(23)).
+		Add("Flag", true).
+		Add("kilo", -12.1234567890).
+		Add("pList", []int{1, 2, 3}).
+		Add("crap", map[string]string{"not": "in"}).
+		Get()
+	assert.Equal(query, "?Blob=Crop&Limit=23&Flag=true&kilo=-12.123456789&pList=1&pList=2&pList=3")
 }
 
 func TestEscapeQuery(t *testing.T) {

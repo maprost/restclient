@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
-	"errors"
 	"github.com/mleuth/restclient/rcdep"
 	"github.com/mleuth/restclient/rcquery"
 	"github.com/mleuth/timeutil"
@@ -16,7 +15,6 @@ import (
 const jsonContentType = "application/json; charset=utf-8"
 const xmlContentType = "application/xml; charset=utf-8"
 const contentType = "Content-Type"
-const RestClientError = -1
 
 type RestClient struct {
 	log           rcdep.Logger
@@ -88,56 +86,49 @@ func (r *RestClient) AddXMLBody(input interface{}) *RestClient {
 	return r
 }
 
-func (r *RestClient) Send() (statusCode int, err error) {
-	_, statusCode, err = r.send()
+func (r *RestClient) Send() (statusCode int, responseError string, err error) {
+	_, statusCode, responseError, err = r.send()
 	return
 }
 
-func (r *RestClient) SendAndGetJsonResponse(output interface{}) (statusCode int, err error) {
-	body, statusCode, err := r.send()
-	if statusCode == RestClientError {
-		return statusCode, err
+func (r *RestClient) SendAndGetJsonResponse(output interface{}) (statusCode int, responseError string, err error) {
+	body, statusCode, responseError, err := r.send()
+	if err != nil {
+		return
 	}
 
 	// set the output if there is something
 	if statusCode == http.StatusOK {
 		err = json.Unmarshal(body, output)
-		if err != nil {
-			return RestClientError, err
-		}
 	}
 
 	return
 }
 
-func (r *RestClient) SendAndGetXMLResponse(output interface{}) (statusCode int, err error) {
-	body, statusCode, err := r.send()
-	if statusCode == RestClientError {
-		return statusCode, err
+func (r *RestClient) SendAndGetXMLResponse(output interface{}) (statusCode int, responseError string, err error) {
+	body, statusCode, responseError, err := r.send()
+	if err != nil {
+		return
 	}
 
 	// set the output if there is something
 	if statusCode == http.StatusOK {
 		err = xml.Unmarshal(body, output)
-		if err != nil {
-			return RestClientError, err
-		}
 	}
 
 	return
 }
 
-func (r *RestClient) send() (body []byte, statusCode int, err error) {
+func (r *RestClient) send() (body []byte, statusCode int, responseError string, err error) {
 	if r.err != nil {
-		statusCode = RestClientError
 		err = r.err
 		return
 	}
 
+	// create request
 	url := r.requestPath + r.query.Get()
 	request, err := http.NewRequest(r.requestMethod, url, r.requestBody)
 	if err != nil {
-		statusCode = RestClientError
 		return
 	}
 
@@ -153,7 +144,6 @@ func (r *RestClient) send() (body []byte, statusCode int, err error) {
 	r.log.Printf("request [time: "+stopwatch.String()+"] "+r.requestMethod, ":", url)
 
 	if err != nil {
-		statusCode = RestClientError
 		return
 	}
 	defer response.Body.Close()
@@ -165,19 +155,16 @@ func (r *RestClient) send() (body []byte, statusCode int, err error) {
 	// get body
 	body, err = ioutil.ReadAll(response.Body)
 	if err != nil {
-		statusCode = RestClientError
 		return
 	}
-
-	// log body
 	r.log.Printf("response Body: %v", string(body))
 
 	// set status
 	statusCode = response.Status
 
-	// set error of failed response (status >= 400)
+	// set responseError of failed response (status >= 400)
 	if response.Status >= http.StatusBadRequest {
-		err = errors.New(string(body))
+		responseError = string(body)
 	}
 
 	return
