@@ -5,6 +5,9 @@ go:
   - 1.8
   - tip
 
+notifications:
+  email: false
+
 script:
-  - ll
+  - ls
   - go test -cover ./...
