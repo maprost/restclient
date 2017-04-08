@@ -9,5 +9,4 @@ notifications:
   email: false
 
 script:
-  - ls
   - go test -cover ./...

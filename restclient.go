@@ -9,12 +9,16 @@ import (
 	"github.com/mleuth/timeutil"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 )
 
 const jsonContentType = "application/json; charset=utf-8"
 const xmlContentType = "application/xml; charset=utf-8"
 const contentType = "Content-Type"
+
+var defaultLogger = log.New(os.Stdout, "", 0)
 
 type RestClient struct {
 	log           rcdep.Logger
@@ -27,19 +31,35 @@ type RestClient struct {
 }
 
 func Get(path string) *RestClient {
-	return &RestClient{log: defaultLogger, requestPath: path, requestMethod: http.MethodGet}
+	rc := newRC(path)
+	rc.requestMethod = http.MethodGet
+	return rc
 }
 
 func Post(path string) *RestClient {
-	return &RestClient{log: defaultLogger, requestPath: path, requestMethod: http.MethodPost}
+	rc := newRC(path)
+	rc.requestMethod = http.MethodPost
+	return rc
 }
 
 func Put(path string) *RestClient {
-	return &RestClient{log: defaultLogger, requestPath: path, requestMethod: http.MethodPut}
+	rc := newRC(path)
+	rc.requestMethod = http.MethodPut
+	return rc
 }
 
 func Delete(path string) *RestClient {
-	return &RestClient{log: defaultLogger, requestPath: path, requestMethod: http.MethodDelete}
+	rc := newRC(path)
+	rc.requestMethod = http.MethodDelete
+	return rc
+}
+
+func newRC(path string) *RestClient {
+	return &RestClient{
+		log:         defaultLogger,
+		requestPath: path,
+		header:      map[string]string{},
+	}
 }
 
 func (r *RestClient) AddLogger(logger rcdep.Logger) *RestClient {
@@ -52,6 +72,8 @@ func (r *RestClient) AddQueryParam(key string, value interface{}) *RestClient {
 	return r
 }
 
+// AddJsonBody adds a struct as json to the request body.
+// Only usable in Post/Put requests.
 func (r *RestClient) AddJsonBody(input interface{}) *RestClient {
 	// check for error
 	if r.err != nil {
@@ -69,6 +91,8 @@ func (r *RestClient) AddJsonBody(input interface{}) *RestClient {
 	return r
 }
 
+// AddXMLBody adds a struct as xml to the request body.
+// Only usable in Post/Put requests.
 func (r *RestClient) AddXMLBody(input interface{}) *RestClient {
 	// check for error
 	if r.err != nil {
@@ -141,8 +165,7 @@ func (r *RestClient) send() (body []byte, statusCode int, responseError string, 
 	client := http.DefaultClient
 	stopwatch := timeutil.NewStopwatch()
 	response, err := client.Do(request)
-	r.log.Printf("request [time: "+stopwatch.String()+"] "+r.requestMethod, ":", url)
-
+	r.log.Printf("request [time: %v] %s:%s", stopwatch.String(), r.requestMethod, url)
 	if err != nil {
 		return
 	}

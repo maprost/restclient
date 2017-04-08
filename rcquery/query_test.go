@@ -14,7 +14,7 @@ func TestEmptyQuery(t *testing.T) {
 	assert.Equal(query, "")
 }
 
-func TestQuery(t *testing.T) {
+func TestAllQueryTypes(t *testing.T) {
 	assert := assertion.New(t)
 
 	query := rcquery.New().
