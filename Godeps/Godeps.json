@@ -1,0 +1,14 @@
+{
+	"ImportPath": "github.com/mleuth/restclient",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v79",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/mleuth/assertion",
+			"Rev": "99a8575acc1c8126ad790b2367e0449fc3aa6b98"
+		}
+	]
+}

@@ -6,12 +6,12 @@ import (
 	"encoding/xml"
 	"github.com/mleuth/restclient/rcdep"
 	"github.com/mleuth/restclient/rcquery"
-	"github.com/mleuth/timeutil"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 const jsonContentType = "application/json; charset=utf-8"
@@ -164,9 +164,10 @@ func (r *RestClient) send() (body []byte, result Result) {
 
 	// send request
 	client := http.DefaultClient
-	stopwatch := timeutil.NewStopwatch()
+	start := time.Now()
 	response, err := client.Do(request)
-	r.log.Printf("request [time: %v] %s:%s", stopwatch.String(), r.requestMethod, url)
+	duration := time.Now().Sub(start)
+	r.log.Printf("request [time: %v] %s:%s", duration, r.requestMethod, url)
 	if err != nil {
 		result.Err = err
 		return
