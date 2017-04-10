@@ -24,10 +24,10 @@ func Test204GetRestClient_ok(t *testing.T) {
 	mux.HandleFunc("/test", test)
 	testServer := httptest.NewServer(mux)
 
-	statusCode, responseErr, err := restclient.Get(testServer.URL + "/test").Send()
-	assert.Nil(err)
-	assert.Equal(statusCode, http.StatusNoContent)
-	assert.Equal(responseErr, "")
+	result := restclient.Get(testServer.URL + "/test").Send()
+	assert.Nil(result.Err)
+	assert.Equal(result.StatusCode, http.StatusNoContent)
+	assert.Equal(result.ResponseError, "")
 	assert.True(getRequest)
 }
 
@@ -50,12 +50,12 @@ func Test200GetRestClient_ok(t *testing.T) {
 	mux.HandleFunc("/test", test)
 	testServer := httptest.NewServer(mux)
 
-	var result Result
-	statusCode, responseErr, err := restclient.Get(testServer.URL + "/test").SendAndGetJsonResponse(&result)
-	assert.Nil(err)
-	assert.Equal(statusCode, http.StatusOK)
-	assert.Equal(responseErr, "")
-	assert.Equal(result, Result{Msg: "Blob"})
+	var r Result
+	result := restclient.Get(testServer.URL + "/test").SendAndGetJsonResponse(&r)
+	assert.Nil(result.Err)
+	assert.Equal(result.StatusCode, http.StatusOK)
+	assert.Equal(result.ResponseError, "")
+	assert.Equal(r, Result{Msg: "Blob"})
 }
 
 func Test404GetRestClient_ok(t *testing.T) {
@@ -71,10 +71,10 @@ func Test404GetRestClient_ok(t *testing.T) {
 	mux.HandleFunc("/test", test)
 	testServer := httptest.NewServer(mux)
 
-	statusCode, responseErr, err := restclient.Get(testServer.URL + "/test").Send()
-	assert.Nil(err)
-	assert.Equal(statusCode, http.StatusBadRequest)
-	assert.Equal(responseErr, "Blob is broken\n")
+	result := restclient.Get(testServer.URL + "/test").Send()
+	assert.Nil(result.Err)
+	assert.Equal(result.StatusCode, http.StatusBadRequest)
+	assert.Equal(result.ResponseError, "Blob is broken\n")
 }
 
 func TestSendBodyWithGetRestClient_ok(t *testing.T) {
@@ -108,10 +108,10 @@ func TestSendBodyWithGetRestClient_ok(t *testing.T) {
 	mux.HandleFunc("/test", test)
 	testServer := httptest.NewServer(mux)
 
-	statusCode, responseErr, err := restclient.Get(testServer.URL + "/test").AddJsonBody(Body{Msg: "Blob"}).Send()
-	assert.Nil(err)
-	assert.Equal(statusCode, http.StatusNoContent)
-	assert.Equal(responseErr, "")
+	result := restclient.Get(testServer.URL + "/test").AddJsonBody(Body{Msg: "Blob"}).Send()
+	assert.Nil(result.Err)
+	assert.Equal(result.StatusCode, http.StatusNoContent)
+	assert.Equal(result.ResponseError, "")
 }
 
 func TestSendBodyWithPostRestClient_ok(t *testing.T) {
@@ -145,8 +145,8 @@ func TestSendBodyWithPostRestClient_ok(t *testing.T) {
 	mux.HandleFunc("/test", test)
 	testServer := httptest.NewServer(mux)
 
-	statusCode, responseErr, err := restclient.Post(testServer.URL + "/test").AddJsonBody(Body{Msg: "Blob"}).Send()
-	assert.Nil(err)
-	assert.Equal(statusCode, http.StatusNoContent)
-	assert.Equal(responseErr, "")
+	result := restclient.Post(testServer.URL + "/test").AddJsonBody(Body{Msg: "Blob"}).Send()
+	assert.Nil(result.Err)
+	assert.Equal(result.StatusCode, http.StatusNoContent)
+	assert.Equal(result.ResponseError, "")
 }

@@ -110,42 +110,42 @@ func (r *RestClient) AddXMLBody(input interface{}) *RestClient {
 	return r
 }
 
-func (r *RestClient) Send() (statusCode int, responseError string, err error) {
-	_, statusCode, responseError, err = r.send()
+func (r *RestClient) Send() (result Result) {
+	_, result = r.send()
 	return
 }
 
-func (r *RestClient) SendAndGetJsonResponse(output interface{}) (statusCode int, responseError string, err error) {
-	body, statusCode, responseError, err := r.send()
-	if err != nil {
+func (r *RestClient) SendAndGetJsonResponse(output interface{}) (result Result) {
+	body, result := r.send()
+	if result.Err != nil {
 		return
 	}
 
 	// set the output if there is something
-	if statusCode == http.StatusOK {
-		err = json.Unmarshal(body, output)
+	if result.StatusCode == http.StatusOK {
+		result.Err = json.Unmarshal(body, output)
 	}
 
 	return
 }
 
-func (r *RestClient) SendAndGetXMLResponse(output interface{}) (statusCode int, responseError string, err error) {
-	body, statusCode, responseError, err := r.send()
-	if err != nil {
+func (r *RestClient) SendAndGetXMLResponse(output interface{}) (result Result) {
+	body, result := r.send()
+	if result.Err != nil {
 		return
 	}
 
 	// set the output if there is something
-	if statusCode == http.StatusOK {
-		err = xml.Unmarshal(body, output)
+	if result.StatusCode == http.StatusOK {
+		result.Err = xml.Unmarshal(body, output)
 	}
 
 	return
 }
 
-func (r *RestClient) send() (body []byte, statusCode int, responseError string, err error) {
+func (r *RestClient) send() (body []byte, result Result) {
 	if r.err != nil {
-		err = r.err
+		result.Err = r.err
 		return
 	}
 
@@ -153,6 +153,7 @@ func (r *RestClient) send() (body []byte, statusCode int, responseError string, 
 	url := r.requestPath + r.query.Get()
 	request, err := http.NewRequest(r.requestMethod, url, r.requestBody)
 	if err != nil {
+		result.Err = err
 		return
 	}
 
@@ -167,6 +168,7 @@ func (r *RestClient) send() (body []byte, statusCode int, responseError string, 
 	response, err := client.Do(request)
 	r.log.Printf("request [time: %v] %s:%s", stopwatch.String(), r.requestMethod, url)
 	if err != nil {
+		result.Err = err
 		return
 	}
 	defer response.Body.Close()
@@ -178,16 +180,17 @@ func (r *RestClient) send() (body []byte, statusCode int, responseError string, 
 	// get body
 	body, err = ioutil.ReadAll(response.Body)
 	if err != nil {
+		result.Err = err
 		return
 	}
 	r.log.Printf("response Body: %v", string(body))
 
 	// set status
-	statusCode = response.StatusCode
+	result.StatusCode = response.StatusCode
 
 	// set responseError of failed response (status >= 400)
-	if statusCode >= http.StatusBadRequest {
-		responseError = string(body)
+	if result.StatusCode >= http.StatusBadRequest {
+		result.ResponseError = string(body)
 	}
 
 	return
