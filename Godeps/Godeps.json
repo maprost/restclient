@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/mleuth/restclient",
+	"ImportPath": "github.com/maprost/restclient",
 	"GoVersion": "go1.8",
 	"GodepVersion": "v79",
 	"Packages": [
@@ -7,8 +7,8 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "github.com/mleuth/assertion",
-			"Rev": "99a8575acc1c8126ad790b2367e0449fc3aa6b98"
+			"ImportPath": "github.com/maprost/assertion",
+			"Rev": "19f9917fc3ebabc69a159fefe6eab70f54da6439"
 		}
 	]
 }

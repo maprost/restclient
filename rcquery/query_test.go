@@ -1,8 +1,8 @@
 package rcquery_test
 
 import (
-	"github.com/mleuth/assertion"
-	"github.com/mleuth/restclient/rcquery"
+	"github.com/maprost/assertion"
+	"github.com/maprost/restclient/rcquery"
 	"net/url"
 	"testing"
 )

@@ -1,8 +1,8 @@
 package rctest
 
 import (
-	"github.com/mleuth/assertion"
-	"github.com/mleuth/restclient"
+	"github.com/maprost/assertion"
+	"github.com/maprost/restclient"
 )
 
 func CheckResult(t assertion.TestEnvironment, actual restclient.Result, expected restclient.Result) {

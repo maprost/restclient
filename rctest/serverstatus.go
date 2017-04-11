@@ -1,7 +1,7 @@
 package rctest
 
 import (
-	"github.com/mleuth/restclient"
+	"github.com/maprost/restclient"
 	"net/http"
 )
 

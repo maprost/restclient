@@ -1,7 +1,7 @@
-[![Build Status](https://travis-ci.org/MLeuth/restclient.svg)](https://travis-ci.org/MLeuth/restclient)
-[![Coverage Status](https://coveralls.io/repos/github/MLeuth/restclient/badge.svg)](https://coveralls.io/github/MLeuth/restclient)
-[![GoDoc](https://godoc.org/github.com/MLeuth/restclient?status.svg)](https://godoc.org/github.com/MLeuth/restclient)
-[![Go Report Card](https://goreportcard.com/badge/github.com/MLeuth/restclient)](https://goreportcard.com/report/github.com/MLeuth/restclient)
+[![Build Status](https://travis-ci.org/maprost/restclient.svg)](https://travis-ci.org/maprost/restclient)
+[![Coverage Status](https://coveralls.io/repos/github/maprost/restclient/badge.svg)](https://coveralls.io/github/maprost/restclient)
+[![GoDoc](https://godoc.org/github.com/maprost/restclient?status.svg)](https://godoc.org/github.com/maprost/restclient)
+[![Go Report Card](https://goreportcard.com/badge/github.com/maprost/restclient)](https://goreportcard.com/report/github.com/maprost/restclient)
 
 # restclient
 lightweight rest client

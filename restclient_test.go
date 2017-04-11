@@ -2,8 +2,8 @@ package restclient_test
 
 import (
 	"encoding/json"
-	"github.com/mleuth/assertion"
-	"github.com/mleuth/restclient"
+	"github.com/maprost/assertion"
+	"github.com/maprost/restclient"
 	"net/http"
 	"net/http/httptest"
 	"testing"
