@@ -13,4 +13,4 @@ before_install:
 
 script:
   - overalls -project=github.com/maprost/restclient -covermode=count
-  - goveralls -coverprofile=test.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN
+  - goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN
