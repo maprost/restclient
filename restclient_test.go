@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"github.com/maprost/restclient/rctest"
 )
 
 func Test204GetRestClient_ok(t *testing.T) {
@@ -25,9 +26,7 @@ func Test204GetRestClient_ok(t *testing.T) {
 	testServer := httptest.NewServer(mux)
 
 	result := restclient.Get(testServer.URL + "/test").Send()
-	assert.Nil(result.Err)
-	assert.Equal(result.StatusCode, http.StatusNoContent)
-	assert.Equal(result.ResponseError, "")
+	rctest.AssertResult(assert, result, rctest.Status204())
 	assert.True(getRequest)
 }
 
@@ -52,9 +51,7 @@ func Test200GetRestClient_ok(t *testing.T) {
 
 	var r Result
 	result := restclient.Get(testServer.URL + "/test").SendAndGetJsonResponse(&r)
-	assert.Nil(result.Err)
-	assert.Equal(result.StatusCode, http.StatusOK)
-	assert.Equal(result.ResponseError, "")
+	rctest.AssertResult(assert, result, rctest.Status200())
 	assert.Equal(r, Result{Msg: "Blob"})
 }
 
@@ -72,9 +69,7 @@ func Test404GetRestClient_ok(t *testing.T) {
 	testServer := httptest.NewServer(mux)
 
 	result := restclient.Get(testServer.URL + "/test").Send()
-	assert.Nil(result.Err)
-	assert.Equal(result.StatusCode, http.StatusBadRequest)
-	assert.Equal(result.ResponseError, "Blob is broken\n")
+	rctest.AssertResult(assert, result, rctest.FailedResponse(400, "Blob is broken\n"))
 }
 
 func TestSendBodyWithGetRestClient_ok(t *testing.T) {
