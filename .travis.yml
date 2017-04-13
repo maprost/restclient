@@ -12,5 +12,5 @@ before_install:
   - go get github.com/go-playground/overalls
 
 script:
-  - overalls -covermode=count
+  - overalls -project=github.com/maprost/restclient -covermode=count
   - goveralls -coverprofile=test.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN
