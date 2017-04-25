@@ -26,5 +26,5 @@ func Status(code int) restclient.Result {
 }
 
 func FailedResponse(code int, msg string) restclient.Result {
-	return restclient.Result{StatusCode: code, ResponseError:msg}
+	return restclient.Result{StatusCode: code, ResponseError: msg}
 }

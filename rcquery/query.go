@@ -15,6 +15,11 @@ func New() *Query {
 }
 
 func (q *Query) Add(key string, value interface{}) *Query {
+	// ignore nil values
+	if value == nil {
+		return q
+	}
+
 	var separator string
 	if len(q.query) == 0 {
 		separator = "?"
@@ -22,7 +27,7 @@ func (q *Query) Add(key string, value interface{}) *Query {
 		separator = "&"
 	}
 
-	val := reflect.ValueOf(value)
+	val := reflect.Indirect(reflect.ValueOf(value))
 	switch val.Kind() {
 	case reflect.Bool:
 		q.query += separator + key + "=" + strconv.FormatBool(val.Bool())

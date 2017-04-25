@@ -4,30 +4,34 @@ import (
 	"encoding/json"
 	"github.com/maprost/assertion"
 	"github.com/maprost/restclient"
+	"github.com/maprost/restclient/rctest"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"github.com/maprost/restclient/rctest"
 )
+
+func runServer(f http.HandlerFunc) (url string) {
+	path := "/test"
+	mux := http.NewServeMux()
+	mux.HandleFunc(path, f)
+	testServer := httptest.NewServer(mux)
+
+	return testServer.URL + path
+}
 
 func Test204GetRestClient_ok(t *testing.T) {
 	assert := assertion.New(t)
 
-	getRequest := false
-	// setup function to test
-	test := func(w http.ResponseWriter, r *http.Request) {
-		getRequest = r.Method == http.MethodGet
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "No get method", http.StatusBadRequest)
+			return
+		}
 		w.WriteHeader(http.StatusNoContent)
-	}
+	})
 
-	// setup server
-	mux := http.NewServeMux()
-	mux.HandleFunc("/test", test)
-	testServer := httptest.NewServer(mux)
-
-	result := restclient.Get(testServer.URL + "/test").Send()
-	rctest.AssertResult(assert, result, rctest.Status204())
-	assert.True(getRequest)
+	result := restclient.Get(url).Send()
+	assert.Nil(result.Error())
 }
 
 func Test200GetRestClient_ok(t *testing.T) {
@@ -37,20 +41,14 @@ func Test200GetRestClient_ok(t *testing.T) {
 		Msg string
 	}
 
-	// setup function to test
-	test := func(w http.ResponseWriter, r *http.Request) {
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		js, _ := json.Marshal(Result{Msg: "Blob"})
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(js)
-	}
-
-	// setup server
-	mux := http.NewServeMux()
-	mux.HandleFunc("/test", test)
-	testServer := httptest.NewServer(mux)
+	})
 
 	var r Result
-	result := restclient.Get(testServer.URL + "/test").SendAndGetJsonResponse(&r)
+	result := restclient.Get(url).SendAndGetJsonResponse(&r)
 	rctest.AssertResult(assert, result, rctest.Status200())
 	assert.Equal(r, Result{Msg: "Blob"})
 }
@@ -58,17 +56,11 @@ func Test200GetRestClient_ok(t *testing.T) {
 func Test404GetRestClient_ok(t *testing.T) {
 	assert := assertion.New(t)
 
-	// setup function to test
-	test := func(w http.ResponseWriter, r *http.Request) {
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Blob is broken", http.StatusBadRequest)
-	}
+	})
 
-	// setup server
-	mux := http.NewServeMux()
-	mux.HandleFunc("/test", test)
-	testServer := httptest.NewServer(mux)
-
-	result := restclient.Get(testServer.URL + "/test").Send()
+	result := restclient.Get(url).Send()
 	rctest.AssertResult(assert, result, rctest.FailedResponse(400, "Blob is broken\n"))
 }
 
@@ -79,8 +71,7 @@ func TestSendBodyWithGetRestClient_ok(t *testing.T) {
 		Msg string
 	}
 
-	// setup function to test
-	test := func(w http.ResponseWriter, r *http.Request) {
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 
 		var body Body
@@ -96,17 +87,10 @@ func TestSendBodyWithGetRestClient_ok(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusNoContent)
-	}
+	})
 
-	// setup server
-	mux := http.NewServeMux()
-	mux.HandleFunc("/test", test)
-	testServer := httptest.NewServer(mux)
-
-	result := restclient.Get(testServer.URL + "/test").AddJsonBody(Body{Msg: "Blob"}).Send()
-	assert.Nil(result.Err)
-	assert.Equal(result.StatusCode, http.StatusNoContent)
-	assert.Equal(result.ResponseError, "")
+	result := restclient.Get(url).AddJsonBody(Body{Msg: "Blob"}).Send()
+	rctest.AssertResult(assert, result, rctest.Status204())
 }
 
 func TestSendBodyWithPostRestClient_ok(t *testing.T) {
@@ -116,8 +100,7 @@ func TestSendBodyWithPostRestClient_ok(t *testing.T) {
 		Msg string
 	}
 
-	// setup function to test
-	test := func(w http.ResponseWriter, r *http.Request) {
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		defer r.Body.Close()
 
 		var body Body
@@ -133,15 +116,38 @@ func TestSendBodyWithPostRestClient_ok(t *testing.T) {
 		}
 
 		w.WriteHeader(http.StatusNoContent)
-	}
+	})
 
-	// setup server
-	mux := http.NewServeMux()
-	mux.HandleFunc("/test", test)
-	testServer := httptest.NewServer(mux)
+	result := restclient.Post(url).AddJsonBody(Body{Msg: "Blob"}).Send()
+	rctest.AssertResult(assert, result, rctest.Status204())
+}
 
-	result := restclient.Post(testServer.URL + "/test").AddJsonBody(Body{Msg: "Blob"}).Send()
-	assert.Nil(result.Err)
-	assert.Equal(result.StatusCode, http.StatusNoContent)
-	assert.Equal(result.ResponseError, "")
+func TestPutRestClient_ok(t *testing.T) {
+	assert := assertion.New(t)
+
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			http.Error(w, "No put method", http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	result := restclient.Put(url).Send()
+	rctest.AssertResult(assert, result, rctest.Status204())
+}
+
+func TestDeleteRestClient_ok(t *testing.T) {
+	assert := assertion.New(t)
+
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodDelete {
+			http.Error(w, "No delete method", http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	result := restclient.Delete(url).Send()
+	rctest.AssertResult(assert, result, rctest.Status204())
 }

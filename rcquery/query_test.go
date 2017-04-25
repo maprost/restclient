@@ -38,3 +38,19 @@ func TestEscapeQuery(t *testing.T) {
 	assert.Nil(e)
 	assert.Equal(unescapedQuery, "?Blob=$ü!")
 }
+
+func TestNilTypes(t *testing.T) {
+	assert := assertion.New(t)
+
+	var str string = "nil"
+	var i int = 0
+	var j *int
+
+	query := rcquery.New().
+		Add("Query", &str).
+		Add("PlainNil", nil).
+		Add("FlagI", &i).
+		Add("FlagJ", j).
+		Get()
+	assert.Equal(query, "?Query=nil&FlagI=0")
+}
