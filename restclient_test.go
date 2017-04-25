@@ -19,7 +19,8 @@ func runServer(f http.HandlerFunc) (url string) {
 	mux.HandleFunc(path, f)
 	testServer := httptest.NewServer(mux)
 
-	return testServer.URL + path
+	url = testServer.URL + path
+	return
 }
 
 func Test204GetRestClient_ok(t *testing.T) {
