@@ -2,12 +2,15 @@ package restclient_test
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"github.com/maprost/assertion"
 	"github.com/maprost/restclient"
 	"github.com/maprost/restclient/rctest"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
+	"time"
 )
 
 func runServer(f http.HandlerFunc) (url string) {
@@ -93,7 +96,7 @@ func TestSendBodyWithGetRestClient_ok(t *testing.T) {
 	rctest.AssertResult(assert, result, rctest.Status204())
 }
 
-func TestSendBodyWithPostRestClient_ok(t *testing.T) {
+func TestSendBodyWithJsonPostRestClient_ok(t *testing.T) {
 	assert := assertion.New(t)
 
 	type Body struct {
@@ -149,5 +152,102 @@ func TestDeleteRestClient_ok(t *testing.T) {
 	})
 
 	result := restclient.Delete(url).Send()
+	rctest.AssertResult(assert, result, rctest.Status204())
+}
+
+func TestSendBodyWithXMLPostRestClient_ok(t *testing.T) {
+	assert := assertion.New(t)
+
+	type Body struct {
+		Msg string
+	}
+
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+
+		var body Body
+		err := xml.NewDecoder(r.Body).Decode(&body)
+		if err != nil {
+			http.Error(w, "Body not readable", http.StatusBadRequest)
+			return
+		}
+
+		if body.Msg != "Blob" {
+			http.Error(w, "Msg is wrong", http.StatusBadRequest)
+			return
+		}
+
+		x, _ := xml.Marshal(body)
+		w.Header().Set("Content-Type", "application/xml")
+		w.Write(x)
+	})
+
+	var res Body
+	result := restclient.Post(url).AddXMLBody(Body{Msg: "Blob"}).SendAndGetXMLResponse(&res)
+	rctest.AssertResult(assert, result, rctest.Status200())
+	assert.Equal(res.Msg, "Blob")
+}
+
+func TestQueryParam_ok(t *testing.T) {
+	assert := assertion.New(t)
+
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
+		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+		if limit != 14 {
+			http.Error(w, "Wrong limit", http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	result := restclient.Get(url).AddQueryParam("limit", 14).Send()
+	rctest.AssertResult(assert, result, rctest.Status204())
+}
+
+func TestPointerQueryParam_ok(t *testing.T) {
+	assert := assertion.New(t)
+
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
+		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+		if limit != 14 {
+			http.Error(w, "Wrong limit", http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	limit := 14
+	result := restclient.Get(url).AddQueryParam("limit", &limit).Send()
+	rctest.AssertResult(assert, result, rctest.Status204())
+}
+
+func TestPointerInBody_ok(t *testing.T) {
+	assert := assertion.New(t)
+
+	type Body struct {
+		Msg     *string
+		Flag    *bool
+		Limit   *int
+		Changed *time.Time
+	}
+
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+
+		var body Body
+		err := json.NewDecoder(r.Body).Decode(&body)
+		if err != nil {
+			http.Error(w, "Body not readable", http.StatusBadRequest)
+			return
+		}
+
+		if body.Msg != nil || body.Flag != nil || body.Limit != nil || body.Changed != nil {
+			http.Error(w, "Nil value is not nil", http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	result := restclient.Get(url).AddJsonBody(Body{}).Send()
 	rctest.AssertResult(assert, result, rctest.Status204())
 }
