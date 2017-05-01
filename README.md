@@ -25,7 +25,7 @@ go get github.com/maprost/restclient
 - query builder
 
 ## Usage
-```
+```go
 var users []User
 result := restclient.Get(serverUrl + "/user").
             AddQueryParam("limit", 1).
@@ -47,7 +47,7 @@ if err := result.Error(); err != nil {
 }
 ```
 
-```
+```go
 var users []User
 result := restclient.Get(serverUrl + "/user" + rcquery.New().Add("limit", 1).Get()).
             SendAndGetJsonResponse(&users)
@@ -56,7 +56,7 @@ if err := result.Error(); err != nil {
 }
 ```
 
-```
+```go
 var user User{/* init */}
 result := restclient.Post(serverUrl + "/user").
             AddJsonBody(user).
