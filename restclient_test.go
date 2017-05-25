@@ -252,3 +252,19 @@ func TestPointerInBody_ok(t *testing.T) {
 	result := restclient.Get(url).AddJsonBody(Body{}).Send()
 	rctest.AssertResult(assert, result, rctest.Status204())
 }
+
+func TestAcceptedLanguageHeader_ok(t *testing.T) {
+	assert := assertion.New(t)
+
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
+		lang := r.Header.Get("Accept-Language")
+		if lang != "da" {
+			http.Error(w, "Wrong lang", http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	result := restclient.Get(url).AddHeader("Accept-Language", "da").Send()
+	rctest.AssertResult(assert, result, rctest.Status204())
+}

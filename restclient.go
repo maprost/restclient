@@ -72,6 +72,11 @@ func (r *RestClient) AddQueryParam(key string, value interface{}) *RestClient {
 	return r
 }
 
+func (r *RestClient) AddHeader(key string, value string) *RestClient {
+	r.header[key] = value
+	return r
+}
+
 // AddJsonBody adds a struct as json to the request body.
 // Only usable in Post/Put requests.
 func (r *RestClient) AddJsonBody(input interface{}) *RestClient {
@@ -85,7 +90,7 @@ func (r *RestClient) AddJsonBody(input interface{}) *RestClient {
 
 	if r.err == nil {
 		r.requestBody = js
-		r.header[contentType] = jsonContentType
+		r.AddHeader(contentType, jsonContentType)
 	}
 
 	return r
@@ -104,7 +109,7 @@ func (r *RestClient) AddXMLBody(input interface{}) *RestClient {
 
 	if r.err == nil {
 		r.requestBody = x
-		r.header[contentType] = xmlContentType
+		r.AddHeader(contentType, xmlContentType)
 	}
 
 	return r
