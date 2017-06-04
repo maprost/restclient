@@ -268,3 +268,14 @@ func TestAcceptedLanguageHeader_ok(t *testing.T) {
 	result := restclient.Get(url).AddHeader("Accept-Language", "da").Send()
 	rctest.AssertResult(assert, result, rctest.Status204())
 }
+
+func TestNoLogging(t *testing.T) {
+	assert := assertion.New(t)
+
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	result := restclient.Get(url).NoLogger().Send()
+	rctest.AssertResult(assert, result, rctest.Status204())
+}
