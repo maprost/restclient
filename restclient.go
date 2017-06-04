@@ -20,8 +20,9 @@ const contentType = "Content-Type"
 
 var defaultLogger = log.New(os.Stdout, "", 0)
 
-type noLogger struct {}
-func (nl noLogger) Printf(format string, v ...interface{}){}
+type noLogger struct{}
+
+func (nl noLogger) Printf(format string, v ...interface{}) {}
 
 type RestClient struct {
 	log           rcdep.Logger
