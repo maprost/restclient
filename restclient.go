@@ -129,6 +129,16 @@ func (r *RestClient) Send() (result Result) {
 	return
 }
 
+func (r *RestClient) SendAndGetResponse() (output string, result Result) {
+	body, result := r.send()
+	if result.Err != nil {
+		return
+	}
+
+	output = string(body)
+	return
+}
+
 func (r *RestClient) SendAndGetJsonResponse(output interface{}) (result Result) {
 	body, result := r.send()
 	if result.Err != nil {

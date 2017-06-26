@@ -279,3 +279,16 @@ func TestNoLogging(t *testing.T) {
 	result := restclient.Get(url).NoLogger().Send()
 	rctest.AssertResult(assert, result, rctest.Status204())
 }
+
+func TestGetResponseWithInteger_ok(t *testing.T) {
+	assert := assertion.New(t)
+
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/xml")
+		w.Write([]byte("12"))
+	})
+
+	response, result := restclient.Get(url).SendAndGetResponse()
+	rctest.AssertResult(assert, result, rctest.Status200())
+	assert.Equal(response, "12")
+}
