@@ -17,8 +17,24 @@ func Status400() restclient.Result {
 	return Status(http.StatusBadRequest)
 }
 
+func Status403() restclient.Result {
+	return Status(http.StatusForbidden)
+}
+
 func Status404() restclient.Result {
 	return Status(http.StatusNotFound)
+}
+
+func Status500() restclient.Result {
+	return Status(http.StatusInternalServerError)
+}
+
+func Status501() restclient.Result {
+	return Status(http.StatusNotImplemented)
+}
+
+func Status503() restclient.Result {
+	return Status(http.StatusServiceUnavailable)
 }
 
 func Status(code int) restclient.Result {
