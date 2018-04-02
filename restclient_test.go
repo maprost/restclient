@@ -265,3 +265,19 @@ func TestGetResponseWithInteger_ok(t *testing.T) {
 	rctest.CheckResult(t, result, rctest.Status200())
 	should.BeEqual(t, response, "12")
 }
+
+func TestGetResponseItem_ok(t *testing.T) {
+	url := runServer(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "maybe an integer")
+		w.Write([]byte("12"))
+	})
+
+	responseItem := restclient.Get(url).SendAndGetResponseItem()
+	rctest.CheckResult(t, responseItem.Result, rctest.Status200())
+
+	should.BeEqual(t, responseItem.String(), "12")
+
+	ct, ok := responseItem.Header("Content-Type")
+	should.BeTrue(t, ok)
+	should.BeEqual(t, ct, []string{"maybe an integer"})
+}
