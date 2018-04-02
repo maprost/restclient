@@ -1,19 +1,17 @@
 package rctest
 
 import (
-	"github.com/maprost/assertion"
+	"testing"
+
 	"github.com/maprost/restclient"
+	"github.com/maprost/should"
 )
 
-func CheckResult(t assertion.TestEnvironment, actual restclient.Result, expected restclient.Result) {
-	assert := assertion.New(t)
-	AssertResult(assert, actual, expected)
-}
+func CheckResult(t testing.TB, actual restclient.Result, expected restclient.Result) {
+	should.BeNil(t, actual.Err)
+	should.BeEqual(t, actual.StatusCode, expected.StatusCode)
 
-func AssertResult(assert assertion.Assert, actual restclient.Result, expected restclient.Result) {
-	assert.Nil(actual.Err)
-	assert.Equal(actual.StatusCode, expected.StatusCode)
 	if len(expected.ResponseError) > 0 {
-		assert.Equal(actual.ResponseError, expected.ResponseError)
+		should.BeEqual(t, actual.ResponseError, expected.ResponseError)
 	}
 }

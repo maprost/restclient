@@ -3,14 +3,15 @@ package restclient_test
 import (
 	"encoding/json"
 	"encoding/xml"
-	"github.com/maprost/assertion"
-	"github.com/maprost/restclient"
-	"github.com/maprost/restclient/rctest"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/maprost/restclient"
+	"github.com/maprost/restclient/rctest"
+	"github.com/maprost/should"
 )
 
 func runServer(f http.HandlerFunc) (url string) {
@@ -24,8 +25,6 @@ func runServer(f http.HandlerFunc) (url string) {
 }
 
 func Test204GetRestClient_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			http.Error(w, "No get method", http.StatusBadRequest)
@@ -35,12 +34,10 @@ func Test204GetRestClient_ok(t *testing.T) {
 	})
 
 	result := restclient.Get(url).Send()
-	assert.Nil(result.Error())
+	should.BeNil(t, result.Error())
 }
 
 func Test200GetRestClient_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	type Result struct {
 		Msg string
 	}
@@ -53,24 +50,20 @@ func Test200GetRestClient_ok(t *testing.T) {
 
 	var r Result
 	result := restclient.Get(url).SendAndGetJsonResponse(&r)
-	rctest.AssertResult(assert, result, rctest.Status200())
-	assert.Equal(r, Result{Msg: "Blob"})
+	rctest.CheckResult(t, result, rctest.Status200())
+	should.BeEqual(t, r, Result{Msg: "Blob"})
 }
 
 func Test404GetRestClient_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Blob is broken", http.StatusBadRequest)
 	})
 
 	result := restclient.Get(url).Send()
-	rctest.AssertResult(assert, result, rctest.FailedResponse(400, "Blob is broken\n"))
+	rctest.CheckResult(t, result, rctest.FailedResponse(400, "Blob is broken\n"))
 }
 
 func TestSendBodyWithGetRestClient_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	type Body struct {
 		Msg string
 	}
@@ -94,12 +87,10 @@ func TestSendBodyWithGetRestClient_ok(t *testing.T) {
 	})
 
 	result := restclient.Get(url).AddJsonBody(Body{Msg: "Blob"}).Send()
-	rctest.AssertResult(assert, result, rctest.Status204())
+	rctest.CheckResult(t, result, rctest.Status204())
 }
 
 func TestSendBodyWithJsonPostRestClient_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	type Body struct {
 		Msg string
 	}
@@ -123,12 +114,10 @@ func TestSendBodyWithJsonPostRestClient_ok(t *testing.T) {
 	})
 
 	result := restclient.Post(url).AddJsonBody(Body{Msg: "Blob"}).Send()
-	rctest.AssertResult(assert, result, rctest.Status204())
+	rctest.CheckResult(t, result, rctest.Status204())
 }
 
 func TestPutRestClient_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
 			http.Error(w, "No put method", http.StatusBadRequest)
@@ -138,12 +127,10 @@ func TestPutRestClient_ok(t *testing.T) {
 	})
 
 	result := restclient.Put(url).Send()
-	rctest.AssertResult(assert, result, rctest.Status204())
+	rctest.CheckResult(t, result, rctest.Status204())
 }
 
 func TestDeleteRestClient_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete {
 			http.Error(w, "No delete method", http.StatusBadRequest)
@@ -153,12 +140,10 @@ func TestDeleteRestClient_ok(t *testing.T) {
 	})
 
 	result := restclient.Delete(url).Send()
-	rctest.AssertResult(assert, result, rctest.Status204())
+	rctest.CheckResult(t, result, rctest.Status204())
 }
 
 func TestSendBodyWithXMLPostRestClient_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	type Body struct {
 		Msg string
 	}
@@ -185,13 +170,11 @@ func TestSendBodyWithXMLPostRestClient_ok(t *testing.T) {
 
 	var res Body
 	result := restclient.Post(url).AddXMLBody(Body{Msg: "Blob"}).SendAndGetXMLResponse(&res)
-	rctest.AssertResult(assert, result, rctest.Status200())
-	assert.Equal(res.Msg, "Blob")
+	rctest.CheckResult(t, result, rctest.Status200())
+	should.BeEqual(t, res.Msg, "Blob")
 }
 
 func TestQueryParam_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 		if limit != 14 {
@@ -202,12 +185,10 @@ func TestQueryParam_ok(t *testing.T) {
 	})
 
 	result := restclient.Get(url).AddQueryParam("limit", 14).Send()
-	rctest.AssertResult(assert, result, rctest.Status204())
+	rctest.CheckResult(t, result, rctest.Status204())
 }
 
 func TestPointerQueryParam_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 		if limit != 14 {
@@ -219,12 +200,10 @@ func TestPointerQueryParam_ok(t *testing.T) {
 
 	limit := 14
 	result := restclient.Get(url).AddQueryParam("limit", &limit).Send()
-	rctest.AssertResult(assert, result, rctest.Status204())
+	rctest.CheckResult(t, result, rctest.Status204())
 }
 
 func TestPointerInBody_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	type Body struct {
 		Msg     *string
 		Flag    *bool
@@ -250,12 +229,10 @@ func TestPointerInBody_ok(t *testing.T) {
 	})
 
 	result := restclient.Get(url).AddJsonBody(Body{}).Send()
-	rctest.AssertResult(assert, result, rctest.Status204())
+	rctest.CheckResult(t, result, rctest.Status204())
 }
 
 func TestAcceptedLanguageHeader_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		lang := r.Header.Get("Accept-Language")
 		if lang != "da" {
@@ -266,29 +243,25 @@ func TestAcceptedLanguageHeader_ok(t *testing.T) {
 	})
 
 	result := restclient.Get(url).AddHeader("Accept-Language", "da").Send()
-	rctest.AssertResult(assert, result, rctest.Status204())
+	rctest.CheckResult(t, result, rctest.Status204())
 }
 
 func TestNoLogging(t *testing.T) {
-	assert := assertion.New(t)
-
 	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
 	result := restclient.Get(url).NoLogger().Send()
-	rctest.AssertResult(assert, result, rctest.Status204())
+	rctest.CheckResult(t, result, rctest.Status204())
 }
 
 func TestGetResponseWithInteger_ok(t *testing.T) {
-	assert := assertion.New(t)
-
 	url := runServer(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/xml")
 		w.Write([]byte("12"))
 	})
 
 	response, result := restclient.Get(url).SendAndGetResponse()
-	rctest.AssertResult(assert, result, rctest.Status200())
-	assert.Equal(response, "12")
+	rctest.CheckResult(t, result, rctest.Status200())
+	should.BeEqual(t, response, "12")
 }

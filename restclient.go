@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
-	"github.com/maprost/restclient/rcdep"
-	"github.com/maprost/restclient/rcquery"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/maprost/restclient/rcdep"
+	"github.com/maprost/restclient/rcquery"
 )
 
 const jsonContentType = "application/json; charset=utf-8"

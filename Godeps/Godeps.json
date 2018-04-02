@@ -1,14 +1,17 @@
 {
 	"ImportPath": "github.com/maprost/restclient",
-	"GoVersion": "go1.8",
+	"GoVersion": "go1.9",
 	"GodepVersion": "v79",
-	"Packages": [
-		"./..."
-	],
 	"Deps": [
 		{
-			"ImportPath": "github.com/maprost/assertion",
-			"Rev": "19f9917fc3ebabc69a159fefe6eab70f54da6439"
+			"ImportPath": "github.com/maprost/should",
+			"Comment": "1.0-12-gc8b8934",
+			"Rev": "c8b893437737e45f425ca61cadc0b0488027aeea"
+		},
+		{
+			"ImportPath": "github.com/maprost/should/internal/msg",
+			"Comment": "1.0-12-gc8b8934",
+			"Rev": "c8b893437737e45f425ca61cadc0b0488027aeea"
 		}
 	]
 }
