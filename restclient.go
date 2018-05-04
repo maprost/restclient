@@ -183,7 +183,7 @@ func (r *RestClient) send() (responseItem ResponseItem) {
 	// add header
 	for key, values := range r.header {
 		for _, value := range values {
-			request.Header.Set(key, value)
+			request.Header.Add(key, value)
 		}
 	}
 
