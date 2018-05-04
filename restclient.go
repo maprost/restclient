@@ -30,7 +30,7 @@ type RestClient struct {
 	requestPath   string
 	requestMethod string
 	requestBody   io.Reader
-	header        map[string]string
+	header        map[string][]string
 	query         rcquery.Query
 	err           error
 }
@@ -63,7 +63,7 @@ func newRC(path string) *RestClient {
 	return &RestClient{
 		log:         defaultLogger,
 		requestPath: path,
-		header:      map[string]string{},
+		header:      make(map[string][]string),
 	}
 }
 
@@ -83,7 +83,13 @@ func (r *RestClient) AddQueryParam(key string, value interface{}) *RestClient {
 }
 
 func (r *RestClient) AddHeader(key string, value string) *RestClient {
-	r.header[key] = value
+	if _, ok := r.header[key]; ok {
+		// update
+		r.header[key] = append(r.header[key], value)
+	} else {
+		// insert
+		r.header[key] = []string{value}
+	}
 	return r
 }
 
@@ -175,8 +181,10 @@ func (r *RestClient) send() (responseItem ResponseItem) {
 	}
 
 	// add header
-	for key, value := range r.header {
-		request.Header.Set(key, value)
+	for key, values := range r.header {
+		for _, value := range values {
+			request.Header.Set(key, value)
+		}
 	}
 
 	// send request
