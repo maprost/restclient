@@ -131,6 +131,22 @@ func (r *RestClient) AddXMLBody(input interface{}) *RestClient {
 	return r
 }
 
+// AddBody adds a []byte to the request body.
+// Only usable in Post/Put requests.
+func (r *RestClient) AddBody(input []byte, contentTypeValue string) *RestClient {
+	// check for error
+	if r.err != nil {
+		return r
+	}
+
+	if r.err == nil {
+		r.requestBody = bytes.NewReader(input)
+		r.AddHeader(contentType, contentTypeValue)
+	}
+
+	return r
+}
+
 func (r *RestClient) Send() (result Result) {
 	responseItem := r.send()
 	result = responseItem.Result
