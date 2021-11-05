@@ -47,6 +47,19 @@ func (r *ResponseItem) Json(output interface{}) {
 	return
 }
 
+func (r *ResponseItem) Body() []byte {
+	if r.Result.Err != nil {
+		return nil
+	}
+
+	// get the output if there is something
+	if r.Result.StatusCode == http.StatusOK {
+		return r.body
+	}
+
+	return nil
+}
+
 func (r *ResponseItem) Header(key string) (values []string, ok bool) {
 	if r.Result.Err != nil {
 		return
