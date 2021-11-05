@@ -33,6 +33,7 @@ type RestClient struct {
 	header        map[string][]string
 	query         rcquery.Query
 	err           error
+	httpClient    *http.Client
 }
 
 func Get(path string) *RestClient {
@@ -69,6 +70,11 @@ func newRC(path string) *RestClient {
 
 func (r *RestClient) AddLogger(logger rcdep.Logger) *RestClient {
 	r.log = logger
+	return r
+}
+
+func (r *RestClient) AddHttpClient(httpClient *http.Client) *RestClient {
+	r.httpClient = httpClient
 	return r
 }
 
@@ -204,9 +210,11 @@ func (r *RestClient) send() (responseItem ResponseItem) {
 	}
 
 	// send request
-	client := http.DefaultClient
+	if r.httpClient == nil {
+		r.httpClient = http.DefaultClient
+	}
 	start := time.Now()
-	response, err := client.Do(request)
+	response, err := r.httpClient.Do(request)
 	duration := time.Now().Sub(start)
 	r.log.Printf("request [time: %v] %s:%s", duration, r.requestMethod, url)
 	if err != nil {
