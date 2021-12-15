@@ -34,6 +34,8 @@ type RestClient struct {
 	query         rcquery.Query
 	err           error
 	httpClient    *http.Client
+	basicAuthUser string
+	basicAuthPW   string
 }
 
 func Get(path string) *RestClient {
@@ -96,6 +98,12 @@ func (r *RestClient) AddHeader(key string, value string) *RestClient {
 		// insert
 		r.header[key] = []string{value}
 	}
+	return r
+}
+
+func (r *RestClient) AddBasicAuth(user string, pw string) *RestClient {
+	r.basicAuthUser = user
+	r.basicAuthPW = pw
 	return r
 }
 
@@ -207,6 +215,10 @@ func (r *RestClient) send() (responseItem ResponseItem) {
 		for _, value := range values {
 			request.Header.Add(key, value)
 		}
+	}
+
+	if r.basicAuthUser != "" {
+		request.SetBasicAuth(r.basicAuthUser, r.basicAuthPW)
 	}
 
 	// send request
