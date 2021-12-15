@@ -218,7 +218,6 @@ func (r *RestClient) send() (responseItem ResponseItem) {
 	}
 
 	if r.basicAuthUser != "" {
-		r.log.Printf("add basic auth: %s -- %s", r.basicAuthUser, r.basicAuthPW)
 		request.SetBasicAuth(r.basicAuthUser, r.basicAuthPW)
 	}
 
@@ -230,7 +229,7 @@ func (r *RestClient) send() (responseItem ResponseItem) {
 	response, err := r.httpClient.Do(request)
 	duration := time.Now().Sub(start)
 	r.log.Printf("request [time: %v] %s:%s", duration, r.requestMethod, url)
-	r.log.Printf("request headers %v", request.Header)
+	//r.log.Printf("request headers %v", request.Header)
 	if err != nil {
 		responseItem.Result.Err = err
 		return
