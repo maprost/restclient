@@ -237,6 +237,7 @@ func (r *RestClient) send() (responseItem ResponseItem) {
 	defer response.Body.Close()
 
 	// show header
+	r.log.Printf("response Url: %s", response.Request.URL.String())
 	r.log.Printf("response Status: %v", response.Status)
 	r.log.Printf("response Headers: %v", response.Header)
 	responseItem.header = response.Header
@@ -250,7 +251,7 @@ func (r *RestClient) send() (responseItem ResponseItem) {
 	r.log.Printf("response Body: %v", string(responseItem.body))
 
 	// set link + status
-	responseItem.Result.Link = response.Request.RequestURI
+	responseItem.Result.Link = response.Request.URL.String()
 	responseItem.Result.StatusCode = response.StatusCode
 
 	// set responseError of failed response (status >= 400)
