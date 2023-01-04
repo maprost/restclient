@@ -6,6 +6,7 @@ import (
 )
 
 type Result struct {
+	Link          string
 	StatusCode    int
 	ResponseError string
 	Err           error

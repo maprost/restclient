@@ -33,7 +33,7 @@ func Test204GetRestClient_ok(t *testing.T) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	result := restclient.Get(url).Send()
+	result := restclient.Get(url).AddLogger(restclient.DefaultLogger).Send()
 	should.BeNil(t, result.Error())
 }
 

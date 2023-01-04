@@ -19,7 +19,7 @@ const jsonContentType = "application/json; charset=utf-8"
 const xmlContentType = "application/xml; charset=utf-8"
 const contentType = "Content-Type"
 
-var defaultLogger = log.New(os.Stdout, "", 0)
+var DefaultLogger = log.New(os.Stdout, "", 0)
 
 type noLogger struct{}
 
@@ -64,7 +64,7 @@ func Delete(path string) *RestClient {
 
 func newRC(path string) *RestClient {
 	return &RestClient{
-		log:         defaultLogger,
+		log:         noLogger{},
 		requestPath: path,
 		header:      make(map[string][]string),
 	}
@@ -249,7 +249,8 @@ func (r *RestClient) send() (responseItem ResponseItem) {
 	}
 	r.log.Printf("response Body: %v", string(responseItem.body))
 
-	// set status
+	// set link + status
+	responseItem.Result.Link = response.Request.RequestURI
 	responseItem.Result.StatusCode = response.StatusCode
 
 	// set responseError of failed response (status >= 400)
