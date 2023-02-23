@@ -8,16 +8,21 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/maprost/restclient/rcdep"
 	"github.com/maprost/restclient/rcquery"
 )
 
-const jsonContentType = "application/json; charset=utf-8"
-const xmlContentType = "application/xml; charset=utf-8"
-const contentType = "Content-Type"
+const (
+	contentType         = "Content-Type"
+	jsonContentType     = "application/json; charset=utf-8"
+	xmlContentType      = "application/xml; charset=utf-8"
+	formDataContentType = "application/x-www-form-urlencoded"
+)
 
 var DefaultLogger = log.New(os.Stdout, "", 0)
 
@@ -145,6 +150,19 @@ func (r *RestClient) AddXMLBody(input interface{}) *RestClient {
 	return r
 }
 
+// AddFormDataBody adds a struct as url.Values to the request body.
+// Only usable in Post requests.
+func (r *RestClient) AddFormDataBody(data url.Values) *RestClient {
+	// check for error
+	if r.err != nil {
+		return r
+	}
+
+	r.requestBody = strings.NewReader(data.Encode())
+	r.AddHeader(contentType, formDataContentType)
+	return r
+}
+
 // AddBody adds a []byte to the request body.
 // Only usable in Post/Put requests.
 func (r *RestClient) AddBody(input []byte, contentTypeValue string) *RestClient {
@@ -153,11 +171,8 @@ func (r *RestClient) AddBody(input []byte, contentTypeValue string) *RestClient 
 		return r
 	}
 
-	if r.err == nil {
-		r.requestBody = bytes.NewReader(input)
-		r.AddHeader(contentType, contentTypeValue)
-	}
-
+	r.requestBody = bytes.NewReader(input)
+	r.AddHeader(contentType, contentTypeValue)
 	return r
 }
 
